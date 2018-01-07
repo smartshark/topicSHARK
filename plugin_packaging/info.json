@@ -73,11 +73,11 @@
             "description": "name of the project to which the mailing list belongs"
         },
         {
-            "name": "filter",
-            "required": true,
+            "name": "topic_name",
+            "required": false,
             "position": 9,
             "type": "execute",
-            "description": "File with the WordList Filter"
+            "description": "Name of the topic model"
         },
         {
             "name": "K",

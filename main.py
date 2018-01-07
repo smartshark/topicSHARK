@@ -38,7 +38,8 @@ def start():
 
     parser = get_base_argparser('Create a topic model.', '1.0.0')
     parser.add_argument('-n', '--project-name', help='Name of the project to analyze.', required=True)
-    parser.add_argument('-f', '--filter', help='File for the worldfilter.', required=True)
+    parser.add_argument('--topic_name', help='Name of the topic model in the database.')
+    parser.add_argument('--plugin_path', help='Path of the plugin', required='true')
     parser.add_argument('-k', '--K', help='How many topics are expected', default=6)
 
     parser.add_argument('--filter_language', help='Filter for Programming Language')
@@ -61,8 +62,9 @@ def start():
 
     project = Project.objects.get(name=args.project_name)
     config = {'product_name': args.project_name,
+              'topic_name' : args.topic_name,
               'K' : int(args.K),
-              'filter' : args.filter,
+              'filter' : args.plugin_path + "/wordfilter.txt",
               'language_filter' : args.filter_language,
               'project_filter' :  args.filter_project,
               'issue_comments' :  args.issue_comments,

@@ -1,10 +1,11 @@
 import logging
 import timeit
+import time
 import sys
 import string
 import re
 
-from mongoengine import connect, Document, StringField, DictField, FileField
+from mongoengine import connect, Document, StringField, DictField, FileField, BooleanField
 from datetime import datetime
 from pycoshark.mongomodels import VCSSystem, IssueSystem, IssueComment, Issue, MailingList, Message
 from pycoshark.utils import create_mongodb_uri_string
@@ -29,6 +30,8 @@ class TopicModel(Document):
         'shard_key': ('project_id', ),
     }
     project_id = StringField()
+    name = StringField()
+    default = BooleanField()
     config = DictField()
     view = FileField()
     dic = FileField()
@@ -54,14 +57,21 @@ class topicSHARK(object):
             
     def configure(self, config):
         self._config = config
+        if 'topic_name' not in config or config["topic_name"] == None:
+            self._config['topic_name'] = 'Topic ' + time.strftime("%c") + " " + time.strftime("%x")
+        # Filter
         text_file = open(config["filter"], "r")
         self.wordfilter = text_file.read().split(',')
         if 'language_filter' in config and config["language_filter"] != None:
             text_file2 = open(config["language_filter"])
             self.language_filter = text_file2.read().split(',')
+        else:
+            self.language_filter = []
         if 'project_filter' in config and config["project_filter"] != None:
             text_file3 = open(config["project_filter"])
             self.project_filter = text_file3.read().split(',')
+        else: 
+            self.project_filter = []
         # Default values    
         if 'issue_comments' not in config or config["issue_comments"] == None:
             self._config['issue_comments'] = 'true'
@@ -138,20 +148,24 @@ class topicSHARK(object):
     
     def uploadToGridFS(self):
         logger.info("Delete old data form database")
-        # Delete old models in database with same configuration
-        for oldmodel in TopicModel.objects.filter(config=self._config):
-            oldmodel.delete()
-
+        default_exits = False;
         prefix = self.getPrefix()
         config_db = { 'K' : self._config['K'],
-              'filter' : self._config['filter'],
-              'language_filter' : self._config['language_filter'],
-              'project_filter' :  self._config['project_filter'],
+              'filter' : self.wordfilter,
+              'language_filter' : self.language_filter,
+              'project_filter' :  self.project_filter,
               'issue_comments' :  self._config['issue_comments'],
               'issues' : self._config['issues'],
               'messages' : self._config['messages'],
               'passes' : self._config['passes']}  
-        dbModel = TopicModel(project_id=self._config['project_id'], config=config_db)
+        # Delete old models in database with same configuration
+        for oldmodel in TopicModel.objects.filter(config=config_db):
+            oldmodel.delete()
+        # Check if default exits
+        for oldmodel in TopicModel.objects.filter(project_id=str(self._config['project_id'])):
+            default_exits = True;
+           
+        dbModel = TopicModel(name=self._config['topic_name'], default= not default_exits,  project_id=str(self._config['project_id']), config=config_db)
         # Upload Dic
         dbModel.dic.put(open(prefix + '_dictionary.dict', 'rb'))
         # Upload corpus
@@ -206,10 +220,8 @@ class topicSHARK(object):
         three = " ".join([w for w in three.split() if len(w)>2])
         ### Wordfilter
         three = " ".join([w for w in three.split() if not w in self.wordfilter])
-        if hasattr(self,'language_filter'):
-            three = " ".join([w for w in three.split() if not w in self.language_filter])
-        if hasattr(self,'project_filter'):
-            three = " ".join([w for w in three.split() if not w in self.project_filter])
+        three = " ".join([w for w in three.split() if not w in self.language_filter])
+        three = " ".join([w for w in three.split() if not w in self.project_filter])
         ###
         three = three.split();
         return three

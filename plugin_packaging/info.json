@@ -129,7 +129,7 @@
             "description": "Steps for building the Topic Model"
         },
         {
-            "name": "debug",
+            "name": "log_level",
             "required": false,
             "position": 17,
             "type": "execute",

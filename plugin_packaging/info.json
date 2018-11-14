@@ -70,7 +70,7 @@
             "required": true,
             "position": 8,
             "type": "execute",
-            "description": "name of the project to which the mailing list belongs"
+            "description": "name of the project"
         },
         {
             "name": "topic_name",

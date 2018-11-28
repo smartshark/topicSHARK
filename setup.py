@@ -10,7 +10,7 @@ if not sys.version_info[0] == 3:
 
 setup(
     name='topicSHARK',
-    version='1.0.0',
+    version='2.0.1',
     author='Benjamin Ledel',
     author_email='benjamin.ledel',
     description='Collect data from issue tracking systems',

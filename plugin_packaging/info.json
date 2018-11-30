@@ -1,7 +1,7 @@
 {
     "name": "topicSHARK",
     "author": "Benjamin Ledel",
-    "version": "0.10",
+    "version": "2.0.1",
     "plugin_type": "other",
     "linux_libraries": [
     ],
@@ -70,7 +70,7 @@
             "required": true,
             "position": 8,
             "type": "execute",
-            "description": "name of the project to which the mailing list belongs"
+            "description": "name of the project"
         },
         {
             "name": "topic_name",
@@ -129,7 +129,7 @@
             "description": "Steps for building the Topic Model"
         },
         {
-            "name": "debug",
+            "name": "log_level",
             "required": false,
             "position": 17,
             "type": "execute",

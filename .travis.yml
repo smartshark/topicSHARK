@@ -1,0 +1,27 @@
+sudo: required
+language: python
+python:
+  - "3.5"
+
+before_install:
+  - printenv | grep -E '^TRAVIS_' > .env
+  - sudo apt-get install -y build-essential wget git python3-pip python3-cffi
+  - sudo pip3 install -U pip setuptools
+  - sudo pip3 install Sphinx
+  - sudo pip3 install sphinx_rtd_theme
+  - sudo pip3 install ghp_import
+
+script:
+  - sudo python3 setup.py install
+
+after_success:
+  - make deploy
+
+deploy:
+  provider: releases
+  api_key: ${GH_TOKEN}
+  file: "plugin_packaging/topicSHARK_plugin.tar"
+  skip_cleanup: true
+  on:
+    repo: smartshark/topicSHARK
+    tags: true          
